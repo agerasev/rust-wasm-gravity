@@ -1,0 +1,9 @@
+[package]
+name = "wasm_games"
+version = "0.1.0"
+authors = ["Alexey Gerasev <alexey.gerasev@gmail.com>"]
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]

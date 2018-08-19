@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+    <script type="text/javascript">
+        let env = {
+            func: () => alert("func")
+        };
+        let main = wasm => {
+            alert(wasm.exports.add_one(41))
+        };
+        fetch('./target/wasm32-unknown-unknown/debug/wasm_games.wasm')
+        .then(response => response.arrayBuffer())
+        .then(bytes => WebAssembly.instantiate(bytes, {env: env}))
+        .then(results => {
+            main(results.instance);
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>
