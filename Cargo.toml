@@ -7,3 +7,4 @@ authors = ["Alexey Gerasev <alexey.gerasev@gmail.com>"]
 crate-type = ["cdylib"]
 
 [dependencies]
+lazy_static = "1.1.0"

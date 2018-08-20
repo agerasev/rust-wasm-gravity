@@ -4,31 +4,11 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=0.6"/>
     <title>Rust WebAssembly test</title>
-    <script type="text/javascript">
-        let instance = null;
-        let env = {
-            js_console: (type, ptr, len) => {
-                const view = new Uint8Array(instance.exports.memory.buffer, ptr, len);
-                const utf8dec = new TextDecoder("utf-8");
-                const str = utf8dec.decode(view);
-                if (type == 1) {
-                    console.error(str);
-                } else {
-                    console.log(str)
-                }
-            }
-        };
-        window.addEventListener("load", () => {
-            fetch('./main.wasm')
-            .then(response => response.arrayBuffer())
-            .then(bytes => WebAssembly.instantiate(bytes, {env: env}))
-            .then(results => {
-                instance = results.instance;
-                instance.exports.main();
-            });
-        });
-    </script>
+    <link rel="shortcut icon" type="image/ico" href="favicon.ico" />
+    <script type="text/javascript" src="./web/canvas.js"></script>
+    <script type="text/javascript" src="./web/main.js"></script>
 </head>
 <body>
+    <canvas id="screen" width=800 height=600>No support for HTML5 canvas!</canvas>
 </body>
 </html>

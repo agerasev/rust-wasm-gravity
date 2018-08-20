@@ -1,3 +1,5 @@
+#![allow(unused_macros)]
+
 macro_rules! my_print(
     ($($arg:tt)*) => { {
         console::write(console::Kind::Log, &format!($($arg)*));
