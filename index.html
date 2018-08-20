@@ -1,18 +1,31 @@
 <!doctype html>
 <html>
 <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=0.6"/>
+    <title>Rust WebAssembly test</title>
     <script type="text/javascript">
+        let instance = null;
         let env = {
-            func: () => alert("func")
+            js_console: (type, ptr, len) => {
+                const view = new Uint8Array(instance.exports.memory.buffer, ptr, len);
+                const utf8dec = new TextDecoder("utf-8");
+                const str = utf8dec.decode(view);
+                if (type == 1) {
+                    console.error(str);
+                } else {
+                    console.log(str)
+                }
+            }
         };
-        let main = wasm => {
-            alert(wasm.exports.add_one(41))
-        };
-        fetch('./target/wasm32-unknown-unknown/debug/wasm_games.wasm')
-        .then(response => response.arrayBuffer())
-        .then(bytes => WebAssembly.instantiate(bytes, {env: env}))
-        .then(results => {
-            main(results.instance);
+        window.addEventListener("load", () => {
+            fetch('./main.wasm')
+            .then(response => response.arrayBuffer())
+            .then(bytes => WebAssembly.instantiate(bytes, {env: env}))
+            .then(results => {
+                instance = results.instance;
+                instance.exports.main();
+            });
         });
     </script>
 </head>

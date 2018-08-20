@@ -1,9 +1,12 @@
-extern {
-	fn func();
-}
+mod console;
+
+#[macro_use]
+mod macros;
 
 #[no_mangle]
-pub extern fn add_one(x: i32) -> i32 {
-	unsafe { func(); }
-    x + 1
+pub extern fn main() {
+    console::setup();
+    let a = [1, 2, 3];
+    let i = 3;
+    my_print!("{:?}", a[i]);
 }
