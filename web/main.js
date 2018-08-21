@@ -1,6 +1,4 @@
 let wasm = null;
-let canvas = null;
-let context = null;
 
 let env = {
     js_console: (type, ptr, len) => {
@@ -14,16 +12,32 @@ let env = {
         }
     }
 };
-Object.assign(env, canvas_env);
 
-window.addEventListener("load", () => {
-    canvas = document.getElementById("screen");
-    context = canvas.getContext("2d");
-    fetch('./main.wasm')
+let import_env = (env, im_env, prefix) => {
+    prefix = !prefix ? "" : prefix;
+    for (var key in im_env) {
+        if (im_env.hasOwnProperty(key)) {
+            env[prefix + key] = im_env[key];
+        }
+    }
+    return env;
+};
+
+let load_wasm = (path, env, onload) => {
+    fetch(path)
     .then(response => response.arrayBuffer())
     .then(bytes => WebAssembly.instantiate(bytes, {env: env}))
     .then(results => {
-        wasm = results.instance;
+        onload(results.instance);
+    });
+};
+
+window.addEventListener("load", () => {
+    canvas_init();
+    import_env(env, canvas_make_env(), "js_canvas_");
+
+    load_wasm("./main.wasm", env, instance => {
+        wasm = instance;
         wasm.exports.init();
         wasm.exports.draw();
     });
