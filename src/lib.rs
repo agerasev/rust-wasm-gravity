@@ -13,6 +13,11 @@ use std::sync::Mutex;
 
 use app::App;
 
+extern {
+    #[allow(dead_code)]
+    fn js_timeout(sec: f64);
+}
+
 lazy_static! {
     static ref APP: Mutex<Option<App>> = Mutex::new(None);
 }
@@ -28,9 +33,16 @@ pub extern fn init() {
 }
 
 #[no_mangle]
-pub extern fn draw() {
+pub extern fn timeout(dt: f64) {
+    my_print!("timeout: {} sec", dt);
+}
+
+#[no_mangle]
+pub extern fn render(dt: f64) {
     let mut guard = APP.lock().unwrap();
     let app = guard.as_mut().unwrap();
+
+    app.step(dt);
     app.draw();
 }
 

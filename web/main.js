@@ -1,4 +1,6 @@
 let wasm = null;
+let done = false;
+let last = null;
 
 let load_str = (ptr, len) => {
     const view = new Uint8Array(wasm.exports.memory.buffer, ptr, len);
@@ -19,6 +21,21 @@ let env = {
         } else {
             console.log(str);
         }
+    },
+    js_timeout: (sec) => {
+        setTimeout(() => {
+            wasm.exports.timeout(parseFloat(sec));
+        }, 1000*sec);
+    }
+};
+
+let render = () => {
+    let now = +new Date();
+    let ms = now - last;
+    last = now;
+    wasm.exports.render(parseFloat(0.001*ms));
+    if (!done) {
+        window.requestAnimationFrame(render);
     }
 };
 
@@ -45,9 +62,17 @@ window.addEventListener("load", () => {
     canvas_init();
     import_env(env, canvas_make_env(), "js_canvas_");
 
+    document.getElementById("stop").addEventListener("click", () => {
+        console.log("stop");
+        done = true;
+    });
+
     load_wasm("./main.wasm", env, instance => {
         wasm = instance;
         wasm.exports.init();
-        wasm.exports.draw();
+
+        last = +new Date();
+        window.requestAnimationFrame(render);
     });
+
 });
