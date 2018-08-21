@@ -8,4 +8,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 lazy_static = "1.1.0"
-vecmat = "0.2.2"
+vecmat = "0.2.3"

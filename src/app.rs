@@ -24,12 +24,12 @@ impl App {
         self.canvas.clear();
         self.canvas.draw(
             &Path::Ellipse {
-                pos: Vec2f64::new_array([400.0, 300.0]),
-                rad: Vec2f64::new_array([160.0, 200.0]),
+                pos: Vec2f64::from_arr([400.0, 300.0]),
+                rad: Vec2f64::from_arr([160.0, 200.0]),
                 rot: 2.0*PI*self.time,
-                angle: Vec2f64::new_array([0.0, 2.0*PI]),
+                angle: Vec2f64::from_arr([0.0, 2.0*PI]),
             },
-            &Method::Fill { color: Color::new_array([0.5, 0.0, 1.0, 1.0]) },
+            &Method::Fill { color: Color::from_arr([0.5, 0.0, 1.0, 1.0]) },
         );
     }
 }

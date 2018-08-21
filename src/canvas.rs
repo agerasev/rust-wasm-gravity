@@ -89,7 +89,7 @@ impl Canvas {
     pub fn size(&self) -> Vec2i32 {
         let mut buf: [i32;2] = [0, 0];
         unsafe { js_canvas_size(buf.as_mut_ptr()); }
-        Vec2i32::new_array([buf[0], buf[1]])
+        Vec2i32::from_arr([buf[0], buf[1]])
     }
 
     pub fn clear(&mut self) {
