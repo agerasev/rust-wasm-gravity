@@ -60,7 +60,8 @@ let load_wasm = (path, env, onload) => {
 
 window.addEventListener("load", () => {
     canvas_init();
-    import_env(env, canvas_make_env(), "js_canvas_");
+    import_env(env, math_env, "js_math_");
+    import_env(env, canvas_env, "js_canvas_");
 
     document.getElementById("stop").addEventListener("click", () => {
         console.log("stop");

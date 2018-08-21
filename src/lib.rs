@@ -5,6 +5,7 @@ extern crate vecmat;
 pub mod console;
 #[macro_use]
 pub mod macros;
+pub mod math;
 
 pub mod app;
 pub mod canvas;
