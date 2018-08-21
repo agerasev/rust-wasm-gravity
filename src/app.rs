@@ -1,6 +1,9 @@
+use std::f64::consts::PI;
+
+use vecmat::vec::*;
+
 use console;
 use canvas::{Canvas, Color, Path, Method};
-use std::f64::consts::PI;
 
 pub struct App {
     canvas: Canvas,
@@ -14,8 +17,13 @@ impl App {
 
     pub fn draw(&mut self) {
         self.canvas.draw(
-            &Path::Ellipse { x: 400.0, y: 300.0, rx: 100.0, ry: 150.0, rot: PI/4.0, sa: 0.0, ea: 2.0*PI },
-            &Method::Fill { color: Color(0.5, 0.0, 1.0, 1.0) }
+            &Path::Ellipse {
+                pos: Vec2f64::new_array([400.0, 300.0]),
+                rad: Vec2f64::new_array([100.0, 150.0]),
+                rot: PI/4.0,
+                angle: Vec2f64::new_array([0.0, 2.0*PI]),
+            },
+            &Method::Fill { color: Color::new_array([0.5, 0.0, 1.0, 1.0]) },
         );
     }
 }

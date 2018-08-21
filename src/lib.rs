@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate lazy_static;
+extern crate vecmat;
 
 pub mod console;
 #[macro_use]

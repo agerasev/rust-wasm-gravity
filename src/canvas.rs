@@ -1,5 +1,7 @@
 use std::f64::consts::PI;
 
+use vecmat::vec::*;
+
 extern {
     fn js_canvas_size(ptr: *mut i32);
 
@@ -26,8 +28,7 @@ extern {
     fn js_canvas_rect(x:f64,y:f64,w:f64,h:f64);
 }
 
-#[derive(Clone, Copy)]
-pub struct Color(pub f64, pub f64, pub f64, pub f64);
+pub type Color = Vec4f64;
 
 pub struct Canvas {
     
@@ -45,53 +46,34 @@ pub enum Method {
 
 pub enum Path {
     Arc {
-        x: f64,
-        y: f64,
-        r: f64,
-        sa: f64,
-        ea: f64,
+        pos: Vec2f64,
+        rad: f64,
+        angle: Vec2f64,
     },
     Circle {
-        x: f64,
-        y: f64,
-        r: f64,
+        pos: Vec2f64,
+        rad: f64,
     },
-    MoveTo {
-        x: f64,
-        y: f64,
-    },
-    LineTo {
-        x: f64,
-        y: f64,
-    },
+    MoveTo { pos: Vec2f64 },
+    LineTo { pos: Vec2f64 },
     BezierTo {
-        x1: f64,
-        y1: f64,
-        x2: f64,
-        y2: f64,
-        x: f64,
-        y: f64,
+        cp1: Vec2f64,
+        cp2: Vec2f64,
+        pos: Vec2f64,
     },
     QuadraticTo {
-        x1: f64,
-        y1: f64,
-        x: f64,
-        y: f64,
+        cp1: Vec2f64,
+        pos: Vec2f64,
     },
     Ellipse {
-        x: f64,
-        y: f64,
-        rx: f64,
-        ry: f64,
+        pos: Vec2f64,
+        rad: Vec2f64,
         rot: f64,
-        sa: f64,
-        ea: f64,
+        angle: Vec2f64,
     },
     Rect {
-        x: f64,
-        y: f64,
-        w: f64,
-        h: f64,
+        pos: Vec2f64,
+        size: Vec2f64,
     },
     Close,
     List {
@@ -104,37 +86,54 @@ impl Canvas {
         Canvas { }
     }
 
-    pub fn size(&self) -> (i32, i32) {
+    pub fn size(&self) -> Vec2i32 {
         let mut buf: [i32;2] = [0, 0];
         unsafe { js_canvas_size(buf.as_mut_ptr()); }
-        (buf[0], buf[1])
+        Vec2i32::new_array([buf[0], buf[1]])
     }
 
     pub fn clear(&mut self) {
-        let (w, h) = self.size();
+        let sizef = self.size().map(|v| v as f64);
         unsafe {
-            js_canvas_clear_rect(0.0, 0.0, w as f64, h as f64);
+            js_canvas_clear_rect(0.0, 0.0, sizef[0], sizef[1]);
         }
     }
     pub fn fill(&mut self, c: Color) {
-        let (w, h) = self.size();
+        let sizef = self.size().map(|v| v as f64);
         unsafe { 
-            js_canvas_fill_style(c.0,c.1,c.2,c.3);
-            js_canvas_fill_rect(0.0, 0.0, w as f64, h as f64);
+            js_canvas_fill_style(c[0],c[1],c[2],c[3]);
+            js_canvas_fill_rect(0.0, 0.0, sizef[0], sizef[1]);
         }
     }
 
     fn draw_path(&mut self, path: &Path) {
         match *path {
-            Path::Arc {x, y, r, sa, ea}               => unsafe { js_canvas_arc(x, y, r, sa, ea); },
-            Path::Circle {x, y, r}                    => unsafe { js_canvas_arc(x, y, r, 0.0, 2.0*PI); },
-            Path::MoveTo {x, y}                       => unsafe { js_canvas_move_to(x, y); },
-            Path::LineTo {x, y}                       => unsafe { js_canvas_line_to(x, y); },
-            Path::BezierTo {x1, y1, x2, y2, x, y}     => unsafe { js_canvas_bezier_curve_to(x1, y1, x2, y2, x, y); },
-            Path::Close {}                            => unsafe { js_canvas_close_path(); },
-            Path::QuadraticTo {x1, y1, x, y}          => unsafe { js_canvas_quadratic_curve_to(x1, y1, x, y); },
-            Path::Ellipse {x, y, rx, ry, rot, sa, ea} => unsafe { js_canvas_ellipse(x, y, rx, ry, rot, sa, ea); },
-            Path::Rect {x, y, w, h}                   => unsafe { js_canvas_rect(x, y, w, h); },
+            Path::Arc {pos, rad, angle} => unsafe {
+                js_canvas_arc(pos[0], pos[1], rad, angle[0], angle[1]);
+            },
+            Path::Circle {pos, rad} => unsafe {
+                js_canvas_arc(pos[0], pos[1], rad, 0.0, 2.0*PI);
+            },
+            Path::MoveTo {pos} => unsafe {
+                js_canvas_move_to(pos[0], pos[1]);
+            },
+            Path::LineTo {pos} => unsafe {
+                js_canvas_line_to(pos[0], pos[1]);
+            },
+            Path::BezierTo {cp1, cp2, pos} => unsafe {
+                js_canvas_bezier_curve_to(cp1[0], cp1[1], cp2[0], cp2[1], pos[0], pos[1]);
+            },
+            Path::QuadraticTo {cp1, pos} => unsafe {
+                js_canvas_quadratic_curve_to(cp1[0], cp1[1], pos[0], pos[1]);
+            },
+            Path::Ellipse {pos, rad, rot, angle} => unsafe {
+                js_canvas_ellipse(pos[0], pos[1], rad[0], rad[1], rot, angle[0], angle[1]); },
+            Path::Rect {pos, size} => unsafe {
+                js_canvas_rect(pos[0], pos[1], size[0], size[1]);
+            },
+            Path::Close {} => unsafe {
+                js_canvas_close_path();
+            },
             Path::List {ref paths} => {
                 for subpath in paths.iter() {
                     self.draw_path(subpath);
@@ -147,11 +146,11 @@ impl Canvas {
         unsafe {
             match *method {
                 Method::Fill { color: c } => {
-                    js_canvas_fill_style(c.0,c.1,c.2,c.3);
+                    js_canvas_fill_style(c[0],c[1],c[2],c[3]);
                     js_canvas_fill();
                 },
                 Method::Stroke { color: c, width: w } => {
-                    js_canvas_stroke_style(c.0,c.1,c.2,c.3);
+                    js_canvas_stroke_style(c[0],c[1],c[2],c[3]);
                     js_canvas_line_width(w);
                     js_canvas_stroke();
                 }
