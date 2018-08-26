@@ -9,12 +9,19 @@ use canvas::{Canvas, Color, Path, Method};
 pub struct App {
     time: f64,
     canvas: Canvas,
+    //system: System,
 }
 
 impl App {
     pub fn new() -> Self {
+        /*
+        let mut system = System { bodies: vec!(
+            Point { pos: Vec2f64::from_arr([200.0, 0.0]), vel: Vec2f64::from_arr([0.0, 10.0]) },
+            Point { pos: Vec2f64::from_arr([400.0, 0.0]), vel: Vec2f64::from_arr([0.0,-10.0]) },
+        ) };
+        */
         my_print!("App created!");
-        App { time: 0.0, canvas: Canvas::new() }
+        App { time: 0.0, canvas: Canvas::new() }//, system }
     }
 
     pub fn step(&mut self, dt: f64) {
