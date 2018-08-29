@@ -34,6 +34,7 @@ pub struct Canvas {
     
 }
 
+#[derive(Debug, Clone)]
 pub enum Method {
     Fill {
         color: Color
@@ -44,6 +45,7 @@ pub enum Method {
     },
 }
 
+#[derive(Debug, Clone)]
 pub enum Path {
     Arc {
         pos: Vec2f64,

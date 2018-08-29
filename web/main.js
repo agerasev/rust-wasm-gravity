@@ -50,7 +50,7 @@ let import_env = (env, im_env, prefix) => {
 };
 
 let load_wasm = (path, env, onload) => {
-    fetch(path)
+    fetch(path + "?_=" + Math.floor(Math.random()*0x80000000))
     .then(response => response.arrayBuffer())
     .then(bytes => WebAssembly.instantiate(bytes, {env: env}))
     .then(results => {

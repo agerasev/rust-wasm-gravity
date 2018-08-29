@@ -9,6 +9,7 @@ pub mod math;
 
 pub mod app;
 pub mod canvas;
+pub mod body;
 
 use std::sync::Mutex;
 
