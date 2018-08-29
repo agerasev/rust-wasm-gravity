@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate lazy_static;
-extern crate vecmat;
+extern crate physsol;
 
 pub mod console;
 #[macro_use]
@@ -9,7 +9,6 @@ pub mod math;
 
 pub mod app;
 pub mod canvas;
-pub mod physics;
 
 use std::sync::Mutex;
 

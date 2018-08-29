@@ -1,12 +1,13 @@
-use vecmat::vec::*;
+use physsol::vec::*;
 
 use console;
 use math::{pow};
 use canvas::{Canvas, Color, Path, Method};
-use physics::*;
+use physsol::point::*;
+use physsol::rk4::*;
 
 pub struct Body {
-    var: RK4Wrap<Point2>,
+    var: Wrap<Point2>,
     mass: f64,
     color: Color,
 }
@@ -26,11 +27,11 @@ impl App {
     pub fn new() -> Self {
         let system = System { g: 2e7, bodies: vec!(
             Body { 
-                var: rk4_wrap(Point2 { pos: Vec2f64::from_arr([200.0, 300.0]), vel: Vec2f64::from_arr([0.0, 100.0]) }),
+                var: wrap(Point2 { pos: Vec2f64::from_arr([200.0, 300.0]), vel: Vec2f64::from_arr([0.0, 100.0]) }),
                 mass: 10.0, color: Color::from_arr([1.0, 0.0, 0.0, 1.0]),
             },
             Body {
-                var: rk4_wrap(Point2 { pos: Vec2f64::from_arr([600.0, 300.0]), vel: Vec2f64::from_arr([0.0,-100.0]) }),
+                var: wrap(Point2 { pos: Vec2f64::from_arr([600.0, 300.0]), vel: Vec2f64::from_arr([0.0,-100.0]) }),
                 mass: 10.0, color: Color::from_arr([0.0, 0.0, 1.0, 1.0]),
             },
         ) };
@@ -55,16 +56,12 @@ impl App {
 
     pub fn step(&mut self, dt: f64) {
         self.time += dt;
-
-        rk4_solve(
-            |f, dt| {
-                self.gravity();
-                for b in &mut self.system.bodies {
-                    f(&mut b.var, dt)
-                }
-            },
-            dt,
-        );
+        solve(|f, dt| {
+            self.gravity();
+            for b in &mut self.system.bodies {
+                f(&mut b.var, dt)
+            }
+        }, dt);
     }
 
     pub fn draw(&mut self) {
