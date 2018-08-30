@@ -22,7 +22,7 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         let time = 0.0;
-        let body_cfg = BodyCfg { track_len: 16, step_dur: 0.2 };
+        let body_cfg = BodyCfg { track_len: 8, step_dur: 0.2 };
         let system = System { bodies: vec!(
             Body::new(
                 &Point2 { pos: Vec2f64::from_arr([200.0, 300.0]), vel: Vec2f64::from_arr([0.0, 100.0]) },
@@ -32,6 +32,11 @@ impl App {
             Body::new(
                 &Point2 { pos: Vec2f64::from_arr([600.0, 300.0]), vel: Vec2f64::from_arr([0.0,-100.0]) },
                 10.0, Color::from_arr([0.0, 0.0, 1.0, 1.0]),
+                &body_cfg,
+            ),
+            Body::new(
+                &Point2 { pos: Vec2f64::from_arr([400.0, 200.0]), vel: Vec2f64::from_arr([0.0, 0.0]) },
+                10.0, Color::from_arr([0.0, 1.0, 0.0, 1.0]),
                 &body_cfg,
             ),
         ), g: 2e7, body_cfg };
@@ -48,7 +53,7 @@ impl App {
             for b1 in left {
                 let r = b1.var.0.pos - b0.var.0.pos;
                 let l = r.length();
-                let s = 0.0; //b0.mass + b1.mass;
+                let s = 4.0*(b0.mass + b1.mass);
                 let g = (r/l)*self.system.g/(l*l + s*s);
                 b0.var.1.vel += g;
                 b1.var.1.vel -= g;
