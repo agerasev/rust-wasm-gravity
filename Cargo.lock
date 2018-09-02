@@ -21,16 +21,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "physsol"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+version = "0.1.1"
+source = "git+https://github.com/nthend/physsol-rs?rev=a3828f215c9161a4b375b58ad3f77a05b8aa7816#a3828f215c9161a4b375b58ad3f77a05b8aa7816"
 dependencies = [
- "vecmat 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vecmat 0.2.4 (git+https://github.com/nthend/vecmat-rs?rev=f7c4b4374d54d20784d320fca88c9b07a52d0774)",
 ]
 
 [[package]]
 name = "vecmat"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+version = "0.2.4"
+source = "git+https://github.com/nthend/vecmat-rs?rev=f7c4b4374d54d20784d320fca88c9b07a52d0774#f7c4b4374d54d20784d320fca88c9b07a52d0774"
 dependencies = [
  "num-integer 0.1.39 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-traits 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -43,16 +43,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "wasm_test"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "lazy_static 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "physsol 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "physsol 0.1.1 (git+https://github.com/nthend/physsol-rs?rev=a3828f215c9161a4b375b58ad3f77a05b8aa7816)",
 ]
 
 [metadata]
 "checksum lazy_static 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ca488b89a5657b0a2ecd45b95609b3e848cf1755da332a0da46e2b2b1cb371a7"
 "checksum num-integer 0.1.39 (registry+https://github.com/rust-lang/crates.io-index)" = "e83d528d2677f0518c570baf2b7abdcf0cd2d248860b68507bdcb3e91d4c0cea"
 "checksum num-traits 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)" = "630de1ef5cc79d0cdd78b7e33b81f083cbfe90de0f4b2b2f07f905867c70e9fe"
-"checksum physsol 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c8f61cdd670d5414e58468d6a40987d8123c95b67400151dd678011eeaf65799"
-"checksum vecmat 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "c8bbb9898091943e8c484e9bab202c7acf262185172800367f7153bc8c85cc81"
+"checksum physsol 0.1.1 (git+https://github.com/nthend/physsol-rs?rev=a3828f215c9161a4b375b58ad3f77a05b8aa7816)" = "<none>"
+"checksum vecmat 0.2.4 (git+https://github.com/nthend/vecmat-rs?rev=f7c4b4374d54d20784d320fca88c9b07a52d0774)" = "<none>"
 "checksum version_check 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "7716c242968ee87e5542f8021178248f267f295a5c4803beae8b8b7fd9bc6051"

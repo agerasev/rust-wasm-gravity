@@ -9,12 +9,12 @@ use physsol::rk4::*;
 use canvas::*;
 
 struct Curve {
-    pts: [Vec2f64; 4],
+    pts: [Vec2<f64>; 4],
     dt: f64,
 }
 
 impl Curve {
-    fn from_points(p0: &Point2, p1: &Point2, dt: f64) -> Self {
+    fn from_points(p0: &Point2<f64>, p1: &Point2<f64>, dt: f64) -> Self {
         Curve { pts: [
             p0.pos,
             p0.pos - p0.vel*dt/3.0,
@@ -23,12 +23,12 @@ impl Curve {
         ], dt }
     }
 
-    fn pos_at(&self, w: f64) -> Vec2f64 {
+    fn pos_at(&self, w: f64) -> Vec2<f64> {
         let rw = 1.0 - w;
         (self.pts[0]*rw + self.pts[1]*3.0*w)*rw*rw + (self.pts[2]*3.0*rw + self.pts[3]*w)*w*w
     }
 
-    fn vel_at(&self, w: f64) -> Vec2f64 {
+    fn vel_at(&self, w: f64) -> Vec2<f64> {
         let rw = 1.0 - w;
         ((self.pts[0]*rw + self.pts[1]*(2.0*w - rw))*rw - (self.pts[2]*(2.0*rw - w) + self.pts[3]*w)*w)*3.0/self.dt
     }
@@ -40,17 +40,17 @@ pub struct BodyCfg {
 }
 
 pub struct Body {
-    pub var: Wrap<Point2>,
+    pub var: Wrap<Point2<f64>>,
     pub mass: f64,
     pub color: Color,
     pub rad: f64,
 
-    track: VecDeque<Point2>,
+    track: VecDeque<Point2<f64>>,
     last_step: f64,
 }
 
 impl Body {
-    pub fn new(point: &Point2, mass: f64, color: Color, cfg: &BodyCfg) -> Self {
+    pub fn new(point: &Point2<f64>, mass: f64, color: Color, cfg: &BodyCfg) -> Self {
         Self {
             var: wrap(point.clone()), mass, color, rad: mass,
             track: VecDeque::with_capacity(cfg.track_len),
@@ -104,7 +104,7 @@ impl Body {
 
         let mut paths = Vec::<Path>::new();
         if curves.len() > 0 {
-            let left = |v: Vec2f64| Vec2f64::from_arr([-v[1], v[0]]);
+            let left = |v: Vec2<f64>| Vec2::from(-v[1], v[0]);
             paths.push(Path::MoveTo { pos: curves[0].pts[0] + left(curves[0].vel_at(0.0).normalize())*self.rad });
             let mut ct = 0.0;
             for curve in curves.iter() {

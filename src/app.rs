@@ -1,6 +1,8 @@
 use console;
 
 use physsol::vec::*;
+use physsol::mat::*;
+use physsol::map::*;
 use physsol::point::*;
 use physsol::rk4::*;
 
@@ -25,18 +27,18 @@ impl App {
         let body_cfg = BodyCfg { track_len: 8, step_dur: 0.2 };
         let system = System { bodies: vec!(
             Body::new(
-                &Point2 { pos: Vec2f64::from_arr([200.0, 300.0]), vel: Vec2f64::from_arr([0.0, 100.0]) },
-                10.0, Color::from_arr([1.0, 0.0, 0.0, 1.0]),
+                &Point2 { pos: Vec2::from(-200.0, 100.0), vel: Vec2::from(50.0, 100.0) },
+                10.0, Color::from(1.0, 0.0, 0.0, 1.0),
                 &body_cfg,
             ),
             Body::new(
-                &Point2 { pos: Vec2f64::from_arr([600.0, 300.0]), vel: Vec2f64::from_arr([0.0,-100.0]) },
-                10.0, Color::from_arr([0.0, 0.0, 1.0, 1.0]),
+                &Point2 { pos: Vec2::from(200.0, 100.0), vel: Vec2::from(50.0,-100.0) },
+                10.0, Color::from(0.0, 0.0, 1.0, 1.0),
                 &body_cfg,
             ),
             Body::new(
-                &Point2 { pos: Vec2f64::from_arr([400.0, 200.0]), vel: Vec2f64::from_arr([0.0, 0.0]) },
-                10.0, Color::from_arr([0.0, 1.0, 0.0, 1.0]),
+                &Point2 { pos: Vec2::from(0.0, -200.0), vel: Vec2::from(-100.0, 0.0) },
+                10.0, Color::from(0.0, 1.0, 0.0, 1.0),
                 &body_cfg,
             ),
         ), g: 2e7, body_cfg };
@@ -53,7 +55,7 @@ impl App {
             for b1 in left {
                 let r = b1.var.0.pos - b0.var.0.pos;
                 let l = r.length();
-                let s = 4.0*(b0.mass + b1.mass);
+                let s = 6.0*(b0.mass + b1.mass);
                 let g = (r/l)*self.system.g/(l*l + s*s);
                 b0.var.1.vel += g;
                 b1.var.1.vel -= g;
@@ -76,6 +78,9 @@ impl App {
 
     pub fn draw(&mut self) {
         self.canvas.clear();
+        let size = self.canvas.size();
+        let center = 0.5*Vec2::from(size[0] as f64, size[1] as f64);
+        self.canvas.transform(Affine2::from(Mat2::one(), center));
         for body in &mut self.system.bodies {
             for (path, method) in body.draw(&self.system.body_cfg, self.time) {
                 self.canvas.draw(&path, &method);

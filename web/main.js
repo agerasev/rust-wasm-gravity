@@ -1,6 +1,6 @@
 let wasm = null;
-let done = false;
 let last = null;
+let done = true;
 
 let load_str = (ptr, len) => {
     const view = new Uint8Array(wasm.exports.memory.buffer, ptr, len);
@@ -30,11 +30,12 @@ let env = {
 };
 
 let render = () => {
-    let now = +new Date();
-    let ms = now - last;
-    last = now;
-    wasm.exports.render(parseFloat(0.001*ms));
     if (!done) {
+        let now = +new Date();
+        let ms = now - last;
+        last = now;
+        wasm.exports.step(parseFloat(0.001*ms));
+        wasm.exports.render();
         window.requestAnimationFrame(render);
     }
 };
@@ -58,22 +59,57 @@ let load_wasm = (path, env, onload) => {
     });
 };
 
+let resize = () => {
+    let width = 
+        window.innerWidth || 
+        document.documentElement.clientWidth || 
+        document.body.clientWidth;
+    let height = 
+        window.innerHeight ||
+        document.documentElement.clientHeight ||
+        document.body.clientHeight;
+
+    canvas_resize(width, height);
+    if (wasm && done) {
+        wasm.exports.render();
+    }
+
+    console.log("resize: " + width + " x " + height);
+};
+
 window.addEventListener("load", () => {
     canvas_init();
+    resize();
+    window.addEventListener("resize", resize);
+
     import_env(env, math_env, "js_math_");
     import_env(env, canvas_env, "js_canvas_");
 
-    document.getElementById("stop").addEventListener("click", () => {
-        console.log("stop");
+    let pause_button = document.getElementById("pause");
+    let start = () => {
+        done = false;
+        last = +new Date();
+        window.requestAnimationFrame(render);
+        console.log("start");
+        pause_button.innerText = "Pause";
+    };
+    let stop = () => {
         done = true;
+        console.log("stop");
+        pause_button.innerText = "Resume";
+    };
+    pause_button.addEventListener("click", () => {
+        if (done) {
+            start();
+        } else {
+            stop();
+        }
     });
 
     load_wasm("./main.wasm", env, instance => {
         wasm = instance;
         wasm.exports.init();
-
-        last = +new Date();
-        window.requestAnimationFrame(render);
+        start();
     });
 
 });

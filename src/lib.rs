@@ -40,11 +40,16 @@ pub extern fn timeout(dt: f64) {
 }
 
 #[no_mangle]
-pub extern fn render(dt: f64) {
+pub extern fn step(dt: f64) {
     let mut guard = APP.lock().unwrap();
     let app = guard.as_mut().unwrap();
-
     app.step(dt);
+}
+
+#[no_mangle]
+pub extern fn render() {
+    let mut guard = APP.lock().unwrap();
+    let app = guard.as_mut().unwrap();
     app.draw();
 }
 

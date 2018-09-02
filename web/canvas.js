@@ -8,11 +8,20 @@ let canvas_init = () => {
     context = canvas.getContext("2d");
 };
 
+let canvas_resize = (w, h) => {
+    canvas.width = w;
+    canvas.height = h;
+};
+
 let canvas_env = {
     size: (ptr) => {
         let view = new Uint32Array(wasm.exports.memory.buffer, ptr, 2);
         view[0] = canvas.width;
         view[1] = canvas.height;
+    },
+
+    set_transform: (m00, m01, m10, m11, x, y) => {
+        context.setTransform(m00, m01, m10, m11, x, y);
     },
 
     fill_style: (r,g,b,a) => {
