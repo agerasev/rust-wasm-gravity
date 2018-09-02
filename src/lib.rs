@@ -1,13 +1,15 @@
 #[macro_use]
 extern crate lazy_static;
-extern crate vecmat;
+extern crate physsol;
 
 pub mod console;
 #[macro_use]
 pub mod macros;
+pub mod math;
 
 pub mod app;
 pub mod canvas;
+pub mod body;
 
 use std::sync::Mutex;
 
@@ -38,11 +40,16 @@ pub extern fn timeout(dt: f64) {
 }
 
 #[no_mangle]
-pub extern fn render(dt: f64) {
+pub extern fn step(dt: f64) {
     let mut guard = APP.lock().unwrap();
     let app = guard.as_mut().unwrap();
-
     app.step(dt);
+}
+
+#[no_mangle]
+pub extern fn render() {
+    let mut guard = APP.lock().unwrap();
+    let app = guard.as_mut().unwrap();
     app.draw();
 }
 

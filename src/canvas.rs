@@ -1,9 +1,10 @@
 use std::f64::consts::PI;
 
-use vecmat::vec::*;
+use physsol::{vec::*, map::*};
 
 extern {
     fn js_canvas_size(ptr: *mut i32);
+    fn js_canvas_set_transform(m00:f64,m01:f64,m10:f64,m11:f64,x:f64,y:f64);
 
     fn js_canvas_fill_style(r:f64,g:f64,b:f64,a:f64);
     fn js_canvas_stroke_style(r:f64,g:f64,b:f64,a:f64);
@@ -31,9 +32,10 @@ extern {
 pub type Color = Vec4f64;
 
 pub struct Canvas {
-    
+    map: Affine2<f64>,
 }
 
+#[derive(Debug, Clone)]
 pub enum Method {
     Fill {
         color: Color
@@ -44,6 +46,7 @@ pub enum Method {
     },
 }
 
+#[derive(Debug, Clone)]
 pub enum Path {
     Arc {
         pos: Vec2f64,
@@ -83,27 +86,47 @@ pub enum Path {
 
 impl Canvas {
     pub fn new() -> Self {
-        Canvas { }
+        Canvas { map: Affine2::new() }
     }
 
     pub fn size(&self) -> Vec2i32 {
         let mut buf: [i32;2] = [0, 0];
         unsafe { js_canvas_size(buf.as_mut_ptr()); }
-        Vec2i32::new_array([buf[0], buf[1]])
+        Vec2i32::from_arr([buf[0], buf[1]])
+    }
+
+    pub fn transform(&mut self, map: Affine2<f64>) {
+        unsafe { 
+            js_canvas_set_transform(
+                map.linear[(0,0)],
+                map.linear[(0,1)],
+                map.linear[(1,0)],
+                map.linear[(1,1)],
+                map.shift[0],
+                map.shift[1],
+            );
+        }
+        self.map = map;
     }
 
     pub fn clear(&mut self) {
+        let map = self.map.clone();
+        self.transform(Affine2::new());
         let sizef = self.size().map(|v| v as f64);
         unsafe {
             js_canvas_clear_rect(0.0, 0.0, sizef[0], sizef[1]);
         }
+        self.transform(map);
     }
     pub fn fill(&mut self, c: Color) {
+        let map = self.map.clone();
+        self.transform(Affine2::new());
         let sizef = self.size().map(|v| v as f64);
         unsafe { 
             js_canvas_fill_style(c[0],c[1],c[2],c[3]);
             js_canvas_fill_rect(0.0, 0.0, sizef[0], sizef[1]);
         }
+        self.transform(map);
     }
 
     fn draw_path(&mut self, path: &Path) {
