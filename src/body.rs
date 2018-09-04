@@ -6,7 +6,7 @@ use physsol::vec::*;
 use physsol::point::*;
 use physsol::rk4::*;
 
-use canvas::*;
+use wasm::canvas::*;
 
 struct Curve {
     pts: [Vec2<f64>; 4],

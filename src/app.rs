@@ -1,12 +1,13 @@
-use console;
-
 use physsol::vec::*;
 use physsol::mat::*;
 use physsol::map::*;
 use physsol::point::*;
 use physsol::rk4::*;
 
-use canvas::*;
+use wasm;
+use wasm::console;
+use wasm::canvas::*;
+
 use body::*;
 
 pub struct System {
@@ -42,10 +43,10 @@ impl App {
                 &body_cfg,
             ),
         ), g: 2e7, body_cfg };
-        my_print!("App created!");
+        console::log("App created!");
         App { time, canvas: Canvas::new(), system }
     }
-
+    
     pub fn gravity(&mut self) {
         for i in 0..self.system.bodies.len() {
             let (left, right) = self.system.bodies.split_at_mut(i);
@@ -62,8 +63,10 @@ impl App {
             }
         }
     }
+}
 
-    pub fn step(&mut self, dt: f64) {
+impl wasm::App for App {
+    fn step(&mut self, dt: f64) {
         self.time += dt;
         solve(|f, dt| {
             self.gravity();
@@ -76,7 +79,7 @@ impl App {
         }
     }
 
-    pub fn draw(&mut self) {
+    fn render(&mut self) {
         self.canvas.clear();
         let size = self.canvas.size();
         let center = 0.5*Vec2::from(size[0] as f64, size[1] as f64);
@@ -86,5 +89,9 @@ impl App {
                 self.canvas.draw(&path, &method);
             }
         }
+    }
+
+    fn timeout(&mut self, _dt: f64) {
+        
     }
 }
