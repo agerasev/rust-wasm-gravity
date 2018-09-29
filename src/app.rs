@@ -1,3 +1,6 @@
+use rand::{Rng, SeedableRng};
+use rand::rngs::{SmallRng};
+
 use physsol::vec::*;
 use physsol::mat::*;
 use physsol::map::*;
@@ -26,23 +29,22 @@ impl App {
     pub fn new() -> Self {
         let time = 0.0;
         let body_cfg = BodyCfg { track_len: 8, step_dur: 0.2 };
-        let system = System { bodies: vec!(
+
+        let mut seed = [0 as u8; 16];
+        wasm::seed(&mut seed[..]);
+        let mut rng = SmallRng::from_seed(seed);
+
+        let system = System { bodies: (0..64).map(|_| {
             Body::new(
-                &Point2 { pos: Vec2::from(-200.0, 100.0), vel: Vec2::from(50.0, 100.0) },
-                10.0, Color::from(1.0, 0.0, 0.0, 1.0),
+                &Point2 { 
+                    pos: Vec2::from(400.0*(rng.gen::<f64>() - 0.5), 400.0*(rng.gen::<f64>() - 0.5)),
+                    vel: Vec2::from(200.0*(rng.gen::<f64>() - 0.5), 200.0*(rng.gen::<f64>() - 0.5))
+                },
+                10.0, 
+                Color::from(rng.gen(), rng.gen(), rng.gen(), 1.0),
                 &body_cfg,
-            ),
-            Body::new(
-                &Point2 { pos: Vec2::from(200.0, 100.0), vel: Vec2::from(50.0,-100.0) },
-                10.0, Color::from(0.0, 0.0, 1.0, 1.0),
-                &body_cfg,
-            ),
-            Body::new(
-                &Point2 { pos: Vec2::from(0.0, -200.0), vel: Vec2::from(-100.0, 0.0) },
-                10.0, Color::from(0.0, 1.0, 0.0, 1.0),
-                &body_cfg,
-            ),
-        ), g: 2e7, body_cfg };
+            )
+        }).collect(), g: 1e5, body_cfg };
         console::log("App created!");
         App { time, canvas: Canvas::new(), system }
     }
