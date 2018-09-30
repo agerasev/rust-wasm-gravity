@@ -34,10 +34,10 @@ impl App {
         wasm::seed(&mut seed[..]);
         let mut rng = SmallRng::from_seed(seed);
 
-        let system = System { bodies: (0..64).map(|_| {
+        let system = System { bodies: (0..16).map(|_| {
             Body::new(
                 &Point2 { 
-                    pos: Vec2::from(400.0*(rng.gen::<f64>() - 0.5), 400.0*(rng.gen::<f64>() - 0.5)),
+                    pos: Vec2::from(800.0*(rng.gen::<f64>() - 0.5), 800.0*(rng.gen::<f64>() - 0.5)),
                     vel: Vec2::from(200.0*(rng.gen::<f64>() - 0.5), 200.0*(rng.gen::<f64>() - 0.5))
                 },
                 10.0, 
@@ -69,6 +69,7 @@ impl App {
 
 impl wasm::App for App {
     fn step(&mut self, dt: f64) {
+        console::log(&format!("{}", dt));
         self.time += dt;
         solve(|f, dt| {
             self.gravity();
@@ -87,9 +88,9 @@ impl wasm::App for App {
         let center = 0.5*Vec2::from(size[0] as f64, size[1] as f64);
         self.canvas.transform(Affine2::from(Mat2::one(), center));
         for body in &mut self.system.bodies {
-            for (path, method) in body.draw(&self.system.body_cfg, self.time) {
-                self.canvas.draw(&path, &method);
-            }
+            let canvas = &mut self.canvas;
+            body.draw(|path: &Path, method: &Method| canvas.draw(path, method), &self.system.body_cfg, self.time);
+            body.draw_track(|path: &Path, method: &Method| canvas.draw(path, method), &self.system.body_cfg, self.time);
         }
     }
 
