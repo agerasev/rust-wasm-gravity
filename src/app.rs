@@ -34,7 +34,7 @@ impl App {
         wasm::seed(&mut seed[..]);
         let mut rng = SmallRng::from_seed(seed);
 
-        let system = System { bodies: (0..16).map(|_| {
+        let system = System { bodies: (0..256).map(|_| {
             Body::new(
                 &Point2 { 
                     pos: Vec2::from(800.0*(rng.gen::<f64>() - 0.5), 800.0*(rng.gen::<f64>() - 0.5)),
@@ -44,7 +44,7 @@ impl App {
                 Color::from(rng.gen(), rng.gen(), rng.gen(), 1.0),
                 &body_cfg,
             )
-        }).collect(), g: 1e5, body_cfg };
+        }).collect(), g: 1e6, body_cfg };
         console::log("App created!");
         App { time, canvas: Canvas::new(), system }
     }
@@ -89,8 +89,8 @@ impl wasm::App for App {
         self.canvas.transform(Affine2::from(Mat2::one(), center));
         for body in &mut self.system.bodies {
             let canvas = &mut self.canvas;
-            body.draw(|path: &Path, method: &Method| canvas.draw(path, method), &self.system.body_cfg, self.time);
-            body.draw_track(|path: &Path, method: &Method| canvas.draw(path, method), &self.system.body_cfg, self.time);
+            body.draw(|p, m| canvas.draw(p, m), &self.system.body_cfg, self.time);
+            body.draw_track(|p, m| canvas.draw(p, m), &self.system.body_cfg, self.time);
         }
     }
 
