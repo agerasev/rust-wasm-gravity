@@ -96,7 +96,7 @@ impl Body {
         let mut dt = time - self.last_step;
         if dt > cfg.step_dur {
             if self.tracks.len() > 0 {
-                let mut curve = Curve::from_points(&self.var.0, &self.tracks.back().unwrap().point, dt);
+                let mut curve = Curve::from_points(&self.var.0, &self.tracks.back().unwrap().point, cfg.step_dur);
                 curve.compute_ort();
                 self.tracks.back_mut().unwrap().curve = curve;
             }
@@ -144,10 +144,14 @@ impl Body {
     pub fn draw_track<F: FnMut(&Path, &Method)>(&mut self, mut func: F, _cfg: &BodyCfg, _time: f64) {
         if self.tracks.len() > 0 {
             let mut paths = Vec::<Path>::with_capacity(2*(self.tracks.len() + 2));
+            let mut started = false;
 
-            paths.push(Path::MoveTo { pos: self.tracks[self.tracks.len() - 1].curve.left(0) });
             for track in self.tracks.iter().rev() {
                 if track.curve.dt > 1e-8 {
+                    if !started {
+                        paths.push(Path::MoveTo { pos: track.curve.left(0) });
+                        started = true;
+                    }
                     paths.push(Path::BezierTo {
                         cp1: track.curve.left(1),
                         cp2: track.curve.left(2),
@@ -155,9 +159,13 @@ impl Body {
                     });
                 }
             }
-            paths.push(Path::LineTo { pos: self.tracks[0].curve.right(3) });
+
+            started = false;
             for track in self.tracks.iter() {
                 if track.curve.dt > 1e-8 {
+                    if !started {
+                        paths.push(Path::LineTo { pos: track.curve.right(3) });
+                    }
                     paths.push(Path::BezierTo {
                         cp1: track.curve.right(2),
                         cp2: track.curve.right(1),
@@ -172,13 +180,16 @@ impl Body {
                 &Method::Fill { color: self.color },
             );
 
-            func(
-                &Path::Circle {
-                    pos: self.tracks[0].curve.pts[3],
-                    rad: self.tracks[0].curve.rad[3],
-                },
-                &Method::Fill { color: self.color },
-            );
+            let end_rad = self.tracks[0].curve.rad[3];
+            if end_rad > 1e-8 {
+                func(
+                    &Path::Circle {
+                        pos: self.tracks[0].curve.pts[3],
+                        rad: end_rad,
+                    },
+                    &Method::Fill { color: self.color },
+                );
+            }
         }
     }
 }

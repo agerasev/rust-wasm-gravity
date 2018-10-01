@@ -28,13 +28,13 @@ pub struct App {
 impl App {
     pub fn new() -> Self {
         let time = 0.0;
-        let body_cfg = BodyCfg { track_len: 8, step_dur: 0.2 };
+        let body_cfg = BodyCfg { track_len: 32, step_dur: 0.2 };
 
         let mut seed = [0 as u8; 16];
         wasm::seed(&mut seed[..]);
         let mut rng = SmallRng::from_seed(seed);
 
-        let system = System { bodies: (0..256).map(|_| {
+        let system = System { bodies: (0..64).map(|_| {
             Body::new(
                 &Point2 { 
                     pos: Vec2::from(800.0*(rng.gen::<f64>() - 0.5), 800.0*(rng.gen::<f64>() - 0.5)),
@@ -44,7 +44,7 @@ impl App {
                 Color::from(rng.gen(), rng.gen(), rng.gen(), 1.0),
                 &body_cfg,
             )
-        }).collect(), g: 1e6, body_cfg };
+        }).collect(), g: 1e5, body_cfg };
         console::log("App created!");
         App { time, canvas: Canvas::new(), system }
     }
@@ -69,7 +69,7 @@ impl App {
 
 impl wasm::App for App {
     fn step(&mut self, dt: f64) {
-        console::log(&format!("{}", dt));
+        //console::log(&format!("{}", dt));
         self.time += dt;
         solve(|f, dt| {
             self.gravity();
