@@ -54,7 +54,7 @@ impl App {
             let (left, right) = self.system.bodies.split_at_mut(i);
             let b0 = &mut right[0];
             b0.var.1.pos = b0.var.0.vel;
-            b0.var.1.vel = Vec2f64::zero();
+            b0.var.1.vel = Vec2::zero();
             for b1 in left {
                 let r = b1.var.0.pos - b0.var.0.pos;
                 let l = r.length();
