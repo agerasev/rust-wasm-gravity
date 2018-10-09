@@ -65,9 +65,7 @@ impl App {
             }
         }
     }
-}
 
-impl wasm::App for App {
     fn step(&mut self, dt: f64) {
         //console::log(&format!("{}", dt));
         self.time += dt;
@@ -93,8 +91,10 @@ impl wasm::App for App {
             body.draw_track(|p, m| canvas.draw(p, m), &self.system.body_cfg, self.time);
         }
     }
+}
 
-    fn timeout(&mut self, _dt: f64) {
+impl wasm::App for App {
+    fn handle(&mut self, event: wasm::Event) {
         
     }
 }
