@@ -10,6 +10,7 @@ use physsol::rk4::*;
 use wasm;
 use wasm::console;
 use wasm::canvas::*;
+use wasm::Event;
 
 use body::*;
 
@@ -94,7 +95,11 @@ impl App {
 }
 
 impl wasm::App for App {
-    fn handle(&mut self, event: wasm::Event) {
-        
+    fn handle(&mut self, event: Event) {
+        match event {
+            Event::Timeout { dt } => console::log(&format!("timeout {}", dt)),
+            Event::Step { dt } => self.step(dt),
+            Event::Render => self.render()
+        }
     }
 }
