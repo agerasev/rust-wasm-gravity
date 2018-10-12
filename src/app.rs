@@ -79,6 +79,7 @@ impl App {
         for b in &mut self.system.bodies {
             b.step(&self.system.body_cfg, self.time);
         }
+        console::log("step");
     }
 
     fn render(&mut self) {
