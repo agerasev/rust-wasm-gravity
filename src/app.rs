@@ -10,6 +10,7 @@ use physsol::rk4::*;
 use wasm;
 use wasm::console;
 use wasm::canvas::*;
+use wasm::Event;
 
 use body::*;
 
@@ -54,7 +55,7 @@ impl App {
             let (left, right) = self.system.bodies.split_at_mut(i);
             let b0 = &mut right[0];
             b0.var.1.pos = b0.var.0.vel;
-            b0.var.1.vel = Vec2f64::zero();
+            b0.var.1.vel = Vec2::zero();
             for b1 in left {
                 let r = b1.var.0.pos - b0.var.0.pos;
                 let l = r.length();
@@ -65,9 +66,7 @@ impl App {
             }
         }
     }
-}
 
-impl wasm::App for App {
     fn step(&mut self, dt: f64) {
         //console::log(&format!("{}", dt));
         self.time += dt;
@@ -93,8 +92,14 @@ impl wasm::App for App {
             body.draw_track(|p, m| canvas.draw(p, m), &self.system.body_cfg, self.time);
         }
     }
+}
 
-    fn timeout(&mut self, _dt: f64) {
-        
+impl wasm::App for App {
+    fn handle(&mut self, event: Event) {
+        match event {
+            Event::Timeout { dt } => console::log(&format!("timeout {}", dt)),
+            Event::Step { dt } => self.step(dt),
+            Event::Render => self.render()
+        }
     }
 }
