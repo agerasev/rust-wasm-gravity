@@ -46,7 +46,9 @@ impl App {
                 &body_cfg,
             )
         }).collect(), g: 1e5, body_cfg };
-        console::log("App created!");
+
+        wasm::mod_load(1, "./res/main.js");
+
         App { time, canvas: Canvas::new(), system }
     }
     
@@ -98,6 +100,7 @@ impl wasm::App for App {
     fn handle(&mut self, event: Event) {
         match event {
             Event::Timeout { dt } => console::log(&format!("timeout {}", dt)),
+            Event::Loaded { id } => if id == 1 { wasm::mod_call("my", "setup"); },
             Event::Step { dt } => self.step(dt),
             Event::Render => self.render()
         }
