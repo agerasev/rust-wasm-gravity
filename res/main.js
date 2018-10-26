@@ -1,4 +1,4 @@
-MODULES["my"] = {
+MODULES["main"] = {
 	"exports": {
 		"setup": {
 			"func": () => {

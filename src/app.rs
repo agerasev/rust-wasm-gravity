@@ -47,7 +47,7 @@ impl App {
             )
         }).collect(), g: 1e5, body_cfg };
 
-        wasm::mod_load(1, "./res/main.js");
+        wasm::mod_load("./res/main.js");
 
         App { time, canvas: Canvas::new(), system }
     }
@@ -100,7 +100,21 @@ impl wasm::App for App {
     fn handle(&mut self, event: Event) {
         match event {
             Event::Timeout { dt } => console::log(&format!("timeout {}", dt)),
-            Event::Loaded { id } => if id == 1 { wasm::mod_call("my", "setup"); },
+            Event::Loaded { path, ok } => {
+                if path == "./res/main.js" {
+                    if ok {
+                        console::log(&format!("resource loaded: '{}'", path));
+                        match wasm::mod_call("main", "setup") {
+                            Ok(_) => (),
+                            Err(call_err) => console::error(&format!("main.setup error: {:?}", call_err)),
+                        }
+                    } else {
+                        console::error(&format!("error load resource: '{}'", path));
+                    }
+                } else {
+                    console::error(&format!("unknown resource: {}", path));
+                }
+            },
             Event::Step { dt } => self.step(dt),
             Event::Render => self.render()
         }
