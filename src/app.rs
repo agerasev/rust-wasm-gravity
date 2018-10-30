@@ -10,9 +10,10 @@ use physsol::rk4::*;
 use wasm;
 use wasm::console;
 use wasm::canvas::*;
-use wasm::Event;
+use wasm::interop::*;
 
 use body::*;
+use helper::*;
 
 pub struct System {
     bodies: Vec<Body>,
@@ -20,8 +21,11 @@ pub struct System {
     body_cfg: BodyCfg,
 }
 
+static HELPER_PATH: &str = "./res/helper.js";
+
 pub struct App {
     time: f64,
+    helper: Option<Helper>,
     canvas: Canvas,
     system: System,
 }
@@ -47,7 +51,7 @@ impl App {
             )
         }).collect(), g: 1e5, body_cfg };
 
-        App { time, canvas: Canvas::new(), system }
+        App { time, helper: None, canvas: Canvas::new(), system }
     }
     
     pub fn gravity(&mut self) {
@@ -98,22 +102,20 @@ impl wasm::App for App {
     fn handle(&mut self, event: Event) {
         match event {
             Event::Start => {
-                wasm::mod_load("./res/main.js");
-                self.canvas.set_as_screen();
+                wasm::module::load(HELPER_PATH);
             },
             Event::Timeout { dt } => console::log(&format!("timeout {}", dt)),
-            Event::Loaded { path, ok } => {
-                if path == "./res/main.js" {
-                    if ok {
-                        wasm::request_frame();
-                        console::log(&format!("resource loaded: '{}'", path));
-                        match wasm::mod_call(&path, "setup") {
-                            Ok(_) => (),
-                            Err(call_err) => console::error(&format!("main.setup error: {:?}", call_err)),
-                        }
-                    } else {
-                        console::error(&format!("error load resource: '{}'", path));
-                    }
+            Event::Loaded { path, resource } => {
+                let resource = resource.unwrap();
+                console::log(&format!("resource loaded: '{}'", path));
+                if path == HELPER_PATH {
+                    let mut helper = Helper::new(match resource {
+                        Resource::Module(module) => module,
+                        //_ => panic!("wrong resource type {:?}", resource),
+                    });
+                    helper.set_screen(&self.canvas);
+                    self.helper = Some(helper);
+                    wasm::request_frame();
                 } else {
                     console::error(&format!("unknown resource: {}", path));
                 }

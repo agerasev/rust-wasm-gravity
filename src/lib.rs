@@ -5,8 +5,9 @@ extern crate rand;
 extern crate wasm_env as wasm;
 extern crate physsol;
 
-pub mod app;
-pub mod body;
+mod app;
+mod body;
+mod helper;
 
 use app::App;
 
