@@ -105,19 +105,16 @@ impl wasm::App for App {
                 wasm::module::load(HELPER_PATH);
             },
             Event::Timeout { dt } => console::log(&format!("timeout {}", dt)),
-            Event::Loaded { path, resource } => {
-                let resource = resource.unwrap();
-                console::log(&format!("resource loaded: '{}'", path));
+            Event::Loaded => {},
+            Event::Module { path, module } => {
+                console::log(&format!("module loaded: '{}'", path));
                 if path == HELPER_PATH {
-                    let mut helper = Helper::new(match resource {
-                        Resource::Module(module) => module,
-                        //_ => panic!("wrong resource type {:?}", resource),
-                    });
+                    let mut helper = Helper::new(module.unwrap());
                     helper.set_screen(&self.canvas);
                     self.helper = Some(helper);
                     wasm::request_frame();
                 } else {
-                    console::error(&format!("unknown resource: {}", path));
+                    console::error(&format!("unknown module: {}", path));
                 }
             },
             Event::Render { dt } =>  {

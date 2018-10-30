@@ -38,4 +38,4 @@ class MyModule {
     }
 };
 
-MODULES[document.currentScript._mod_name] = new MyModule();
+MODULES[document.currentScript._mod_id] = new MyModule();
