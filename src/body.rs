@@ -1,3 +1,4 @@
+use std::f64::consts::{PI};
 use std::collections::VecDeque;
 
 //use console;
@@ -143,6 +144,9 @@ impl Body {
 
     pub fn draw_track<F: FnMut(&Path, &Method)>(&mut self, mut func: F, _cfg: &BodyCfg, _time: f64) {
         if self.tracks.len() > 0 {
+            let mut track_color = self.color;
+            track_color[3] *= 0.5;
+
             let mut paths = Vec::<Path>::with_capacity(2*(self.tracks.len() + 2));
             let mut started = false;
 
@@ -160,6 +164,17 @@ impl Body {
                 }
             }
 
+            let end_rad = self.tracks[0].curve.rad[3];
+            if end_rad > 1e-8 {
+                let end_dir = self.tracks[0].curve.pts[2] - self.tracks[0].curve.pts[3];
+                let ang = end_dir[0].atan2(-end_dir[1]);
+                paths.push(Path::Arc {
+                    pos: self.tracks[0].curve.pts[3],
+                    rad: end_rad,
+                    angle: Vec2::from(ang, ang + PI),
+                });
+            }
+
             started = false;
             for track in self.tracks.iter() {
                 if track.curve.dt > 1e-8 {
@@ -174,22 +189,11 @@ impl Body {
                 }
             }
             paths.push(Path::Close);
-        
+
             func(
                 &Path::List { paths },
-                &Method::Fill { color: self.color },
+                &Method::Fill { color: track_color },
             );
-
-            let end_rad = self.tracks[0].curve.rad[3];
-            if end_rad > 1e-8 {
-                func(
-                    &Path::Circle {
-                        pos: self.tracks[0].curve.pts[3],
-                        rad: end_rad,
-                    },
-                    &Method::Fill { color: self.color },
-                );
-            }
         }
     }
 }

@@ -10,9 +10,10 @@ use physsol::rk4::*;
 use wasm;
 use wasm::console;
 use wasm::canvas::*;
-use wasm::Event;
+use wasm::interop::*;
 
 use body::*;
+use helper::*;
 
 pub struct System {
     bodies: Vec<Body>,
@@ -20,8 +21,11 @@ pub struct System {
     body_cfg: BodyCfg,
 }
 
+static HELPER_PATH: &str = "./res/helper.js";
+
 pub struct App {
     time: f64,
+    helper: Option<Helper>,
     canvas: Canvas,
     system: System,
 }
@@ -46,8 +50,8 @@ impl App {
                 &body_cfg,
             )
         }).collect(), g: 1e5, body_cfg };
-        console::log("App created!");
-        App { time, canvas: Canvas::new(), system }
+
+        App { time, helper: None, canvas: Canvas::new(), system }
     }
     
     pub fn gravity(&mut self) {
@@ -97,9 +101,27 @@ impl App {
 impl wasm::App for App {
     fn handle(&mut self, event: Event) {
         match event {
+            Event::Start => {
+                wasm::module::load(HELPER_PATH);
+            },
             Event::Timeout { dt } => console::log(&format!("timeout {}", dt)),
-            Event::Step { dt } => self.step(dt),
-            Event::Render => self.render()
+            Event::Loaded => {},
+            Event::Module { path, module } => {
+                console::log(&format!("module loaded: '{}'", path));
+                if path == HELPER_PATH {
+                    let mut helper = Helper::new(module.unwrap());
+                    helper.set_screen(&self.canvas);
+                    self.helper = Some(helper);
+                    wasm::request_frame();
+                } else {
+                    console::error(&format!("unknown module: {}", path));
+                }
+            },
+            Event::Render { dt } =>  {
+                self.step(dt);
+                self.render();
+                wasm::request_frame();
+            }
         }
     }
 }
