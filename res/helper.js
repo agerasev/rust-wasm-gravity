@@ -5,7 +5,12 @@ class HelperModule {
         this.pannel = null;
         this.pansize = 0.4;
         this.button = null;
+        this.pause = false;
 
+        this.codes = {
+            "pause": 0x01,
+            "resize": 0x02,
+        };
 
         this.exports = {
             "set_screen": {
@@ -62,6 +67,14 @@ class HelperModule {
         this.button = button;
         document.body.appendChild(this.button);
         
+        let pause_button = document.createElement("button");
+        pause_button.innerText = "Pause";
+        pause_button.addEventListener("click", () => {
+            pause_button.innerText = this.pause ? "Pause" : "Resume";
+            this.pause = !this.pause;
+            handle(EVENT.USER, [this.codes["pause"], this.pause], ["u32", "i32"]);
+        });
+        pannel.appendChild(pause_button);
 
         window.addEventListener("resize", this.resize.bind(this));
     }
@@ -84,6 +97,8 @@ class HelperModule {
             this.pannel.style.right = "0px";
 
             this.button.style.right = "0px";
+
+            handle(EVENT.USER, [this.codes["resize"]], ["u32"]);
 
             console.log("[info] resize: " + width + " x " + height);
         }

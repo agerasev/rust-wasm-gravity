@@ -10,7 +10,7 @@ use physsol::rk4::*;
 use wasm;
 use wasm::console;
 use wasm::canvas::*;
-use wasm::interop::*;
+use wasm::event::*;
 
 use body::*;
 use helper::*;
@@ -23,7 +23,19 @@ pub struct System {
 
 static HELPER_PATH: &str = "./res/helper.js";
 
+pub struct Flags {
+    pause: bool,
+    redraw: bool,
+}
+
+impl Flags {
+    fn new() -> Self {
+        Flags { pause: false, redraw: false }
+    }
+}
+
 pub struct App {
+    flags: Flags,
     time: f64,
     helper: Option<Helper>,
     canvas: Canvas,
@@ -51,7 +63,7 @@ impl App {
             )
         }).collect(), g: 1e5, body_cfg };
 
-        App { time, helper: None, canvas: Canvas::new(), system }
+        App { flags: Flags::new(), time, helper: None, canvas: Canvas::new(), system }
     }
     
     pub fn gravity(&mut self) {
@@ -72,28 +84,34 @@ impl App {
     }
 
     fn step(&mut self, dt: f64) {
-        //console::log(&format!("{}", dt));
-        self.time += dt;
-        solve(|f, dt| {
-            self.gravity();
+        if !self.flags.pause {
+            //console::log(&format!("step: {}", dt));
+            self.time += dt;
+            solve(|f, dt| {
+                self.gravity();
+                for b in &mut self.system.bodies {
+                    f(&mut b.var, dt)
+                }
+            }, dt);
             for b in &mut self.system.bodies {
-                f(&mut b.var, dt)
+                b.step(&self.system.body_cfg, self.time);
             }
-        }, dt);
-        for b in &mut self.system.bodies {
-            b.step(&self.system.body_cfg, self.time);
         }
     }
 
     fn render(&mut self) {
-        self.canvas.clear();
-        let size = self.canvas.size();
-        let center = 0.5*Vec2::from(size[0] as f64, size[1] as f64);
-        self.canvas.transform(Affine2::from(Mat2::one(), center));
-        for body in &mut self.system.bodies {
-            let canvas = &mut self.canvas;
-            body.draw(|p, m| canvas.draw(p, m), &self.system.body_cfg, self.time);
-            body.draw_track(|p, m| canvas.draw(p, m), &self.system.body_cfg, self.time);
+        if !self.flags.pause || self.flags.redraw {
+            //console::log(&format!("draw"));
+            self.canvas.clear();
+            let size = self.canvas.size();
+            let center = 0.5*Vec2::from(size[0] as f64, size[1] as f64);
+            self.canvas.transform(Affine2::from(Mat2::one(), center));
+            for body in &mut self.system.bodies {
+                let canvas = &mut self.canvas;
+                body.draw(|p, m| canvas.draw(p, m), &self.system.body_cfg, self.time);
+                body.draw_track(|p, m| canvas.draw(p, m), &self.system.body_cfg, self.time);
+            }
+            self.flags.redraw = false;
         }
     }
 }
@@ -121,7 +139,19 @@ impl wasm::App for App {
                 self.step(dt);
                 self.render();
                 wasm::request_frame();
-            }
+            },
+            Event::User => {
+                let user_event = Helper::user_event().unwrap();
+                console::log(&format!("{:?}", user_event));
+                match user_event {
+                    UserEvent::Pause(pause) => {
+                        self.flags.pause = pause;
+                    },
+                    UserEvent::Resize => {
+                        self.flags.redraw = true;
+                    }
+                }
+            },
         }
     }
 }
