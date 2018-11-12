@@ -122,7 +122,7 @@ impl wasm::App for App {
             Event::Start => {
                 wasm::module::load(HELPER_PATH);
             },
-            Event::Timeout { dt } => console::log(&format!("timeout {}", dt)),
+            Event::Timeout(dt) => console::log(&format!("timeout {}", dt)),
             Event::Loaded => {},
             Event::Module { path, module } => {
                 console::log(&format!("module loaded: '{}'", path));
@@ -140,8 +140,8 @@ impl wasm::App for App {
                 self.render();
                 wasm::request_frame();
             },
-            Event::User => {
-                let user_event = Helper::user_event().unwrap();
+            Event::User(data) => {
+                let user_event = UserEvent::from(&data).unwrap();
                 console::log(&format!("{:?}", user_event));
                 match user_event {
                     UserEvent::Pause(pause) => {
