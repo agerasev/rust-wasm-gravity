@@ -72,7 +72,7 @@ class HelperModule {
         pause_button.addEventListener("click", () => {
             pause_button.innerText = this.pause ? "Pause" : "Resume";
             this.pause = !this.pause;
-            handle(EVENT.USER, [this.codes["pause"], this.pause], ["u32", "i32"]);
+            handle(EVENT.USER.pack(["u32", "i32"], [this.codes["pause"], this.pause]));
         });
         pannel.appendChild(pause_button);
 
@@ -98,7 +98,7 @@ class HelperModule {
 
             this.button.style.right = "0px";
 
-            handle(EVENT.USER, [this.codes["resize"]], ["u32"]);
+            handle(EVENT.USER.pack(["u32"], [this.codes["resize"]]));
 
             console.log("[info] resize: " + width + " x " + height);
         }
